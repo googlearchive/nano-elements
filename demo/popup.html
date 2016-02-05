@@ -1,0 +1,265 @@
+<!doctype html>
+<html>
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
+  <title>nano-popup</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+    }
+  </style>
+  
+  <link rel="import" href="../../polymer/polymer-nano.debug.html">
+  <link rel="import" href="../nano-popup.html">
+  
+  <link rel="import" href="../nano-layout.html">
+  <link rel="import" href="../../icons-simple.html">
+
+</head>
+<body>
+
+  <main-view></main-view>
+  
+  <style>
+    main-view {
+      display: block;
+      background-color: #d5d5d5;
+    }
+    main-view a {
+      text-decoration: none;
+      color: inherit;
+    }
+    main-view main-content {
+      display: block;
+      box-sizing: border-box;
+      margin: 0 310px;
+      /* avoid margin-collapsing */
+      padding-top: 96px;
+      /*transform: translate3d(0, 96px, 0);*/
+    }
+    main-view nav-bar[fixed] {
+      top: 96px;
+      width: 310px;
+      background-color: #3f5566;
+      font-weight: bold;
+    }
+    main-view icon[menu] {
+      display: none;
+    }
+    main-view app-bar[fixed] {
+      padding-left: 16px;
+      height: 96px;
+      bottom: auto;
+      color: white;
+      background-color: #3f5566;
+    }
+    main-view crumb-bar {
+      color: white;
+      width: 640px;
+      min-width: 320px;
+      margin: 0 auto;
+      font-size: 125%;
+    } 
+    @media (max-width: 1024px) {
+      main-view main-content {
+        margin-right: 0;
+      }
+    }
+    @media (max-width: 640px) {
+      main-view main-content {
+        margin-left: 0;
+      }
+      main-view nav-bar {
+        transform: translate3d(-310px, 0, 0);
+      }
+      main-view nav-bar[open] {
+        transform: translate3d(0, 0, 0);
+      }
+      main-view icon[menu] {
+        display: inline-block;
+      }
+    }
+    #popup {
+      background-color: white;
+      width: 310px;
+      height: 300px;
+      padding: 24px;
+      display: none;
+    }
+    card-view {
+      display: block;
+      background-color: white;
+      height: 300px;
+      border: 1px solid gray;
+      margin: 20px auto;
+      width: 300px;
+      padding: 24px;
+    }
+  </style>
+
+  <template id="main-view">
+
+    <nano-router on-route-changed="onUpdateRoute"></nano-router>
+
+    <main-content route="{{route}}">
+      <card-view></card-view>
+      <card-view>
+        <button on-click="popup">Popup</button>
+        <button on-click="popout">Popout</button>
+        <button on-click="dialog">Dialog</button>
+      </card-view>
+      <card-view></card-view>
+      <card-view></card-view>
+      <card-view>
+        <button on-click="popup">Popup</button>
+        <button on-click="popout">Popout</button>
+        <button on-click="dialog">Dialog</button>
+      </card-view>
+      <card-view></card-view>
+    </main-content>
+
+    <nav-bar fixed on-click="toggleNav"></nav-bar>
+
+    <app-bar fixed horizontal center layout>
+      <icon menu on-click="toggleNav"></icon>
+      <icon settings on-click="popup"></icon>
+      <icon key on-click="animate"></icon>
+      <space></space>
+      <crumb-bar routes="{{routes}}"></crumb-bar>
+      <span>n&aring;no-popup&nbsp;</span>
+    </app-bar>
+
+    <nano-popup ></nano-popup>
+    <div id="popup" on-click="close">Stuff</div>
+
+    <nano-layers id="layers"></nano-layers>
+    <nano-animated-box id="animated"></nano-animated-box>
+
+  </template>  
+
+  <script>
+
+    document.registerElement('main-view', {
+      prototype: {
+        __proto__: HTMLElement.prototype,
+        template: document.currentImport.querySelector('#main-view'),
+        createdCallback: function() {
+          Accessors.for(this, ['navOpen', 'route']);
+          this._dom = Annotations.stamp(this.template, this, this);
+        },
+        $$: function(slctr) {
+          return this.querySelector(slctr);
+        },
+        toggleNav: function() {
+          this.navOpen = !this.navOpen;
+        },
+        navOpenChanged: function(open) {
+          Nano.boolAttribute(this.$$('nav-bar'), 'open', open);
+        },
+        onUpdateRoute: function(e) {
+          this.route = e.detail.route;
+        },
+        routeChanged: function(route) {
+          // extract state information from route
+          var routes = route.split('/');
+          var last = routes.pop() || "";
+          routes.push(last);
+          // render breadcrumbs
+          this.updateBindings('routes', routes);
+          // scroll to
+          this.updateBindings('route', last);
+        },
+        popup0: function() {
+          this.$$('nano-popup').popup(this.$.popup, {animate: true});
+        },
+        close: function() {
+          this.$$('nano-popup').close();
+        },
+        animate: function() {
+          var layer = this.$$('#layers').open();
+          layer.layer.addEventListener('click', function(e) {
+            this.$$('#layers').close();
+          }.bind(this));
+          this.$$('#animated').animate(layer, {top: 300, left: 300, width: 100}, {top: 100, left: 100, width: 400});
+        },
+        popout: function(e) {
+          var start = e.target.parentElement.getBoundingClientRect();
+          var end = {left: 0, top: 96, width: window.innerWidth, height: window.innerHeight - 96};
+          var layer = this.$$('#layers').open('transparent');
+          var box = this.$$('#animated').animate(layer, start, end);
+          setTimeout(function() {
+            document.body.style.overflow = 'hidden';
+          }, 200);
+          layer.layer.addEventListener('click', function(e) {
+            document.body.style.overflow = '';
+            box.remove();
+            this.$$('#animated').animate(layer, end, start);
+            setTimeout(function() {
+              this.$$('#layers').close();
+            }.bind(this), 200);
+          }.bind(this));
+        },
+        popup: function(e) {
+          // return value is immutable (!)
+          var start = e.target.getBoundingClientRect();
+          start = {left: start.left, top: start.top + start.height, width: start.width, height: start.height};
+          var end = {left: start.left, top: start.top, width: start.width, height: 200};
+          var layer = this.$$('#layers').open('transparent');
+          var box = this.$$('#animated').animate(layer, start, end);
+          box.style.backgroundColor = 'silver';
+          box.style.overflow = 'auto';
+          var div = document.createElement('div');
+          div.textContent = 'stuff';
+          setTimeout(function() {
+            div.style.position = 'fixed';
+            div.style.top = end.top + 'px';
+            div.style.width = end.width + 'px';
+            div.style.height = end.height + 'px';
+            div.style.left = end.left + 'px';
+            div.style.border = '2px solid orange';
+            div.style.boxSizing = 'border-box';
+            layer.layer.appendChild(div);
+          }, 200);
+          //setTimeout(function() {
+          //  document.body.style.overflow = 'hidden';
+          //}, 200);
+          layer.layer.addEventListener('click', function(e) {
+            //document.body.style.overflow = '';
+            div.remove();
+            box.remove();
+            this.$$('#animated').animate(layer, end, start);
+            setTimeout(function() {
+              this.$$('#layers').close();
+            }.bind(this), 200);
+          }.bind(this));
+        },
+        dialog: function(e) {
+          var start = e.target.getBoundingClientRect();
+          var ww = window.innerWidth, m = Math.floor(ww*0.1);
+          var end = {left: m, top: 150, width: ww-m-m, height: window.innerHeight - 150 - 150};
+          var layer = this.$$('#layers').open('rgba(16, 16, 16, 0.7)');
+          var box = this.$$('#animated').animate(layer, start, end);
+          setTimeout(function() {
+            document.body.style.overflow = 'hidden';
+          }, 200);
+          layer.layer.addEventListener('click', function(e) {
+            document.body.style.overflow = '';
+            box.remove();
+            this.$$('#animated').animate(layer, end, start);
+            setTimeout(function() {
+              this.$$('#layers').close();
+            }.bind(this), 200);
+          }.bind(this));
+        }
+      }
+    });
+
+  </script>
+
+</body>
+</html>

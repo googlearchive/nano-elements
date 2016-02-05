@@ -1,0 +1,118 @@
+<style>
+  [is=nano-button] {
+    padding: 12px 24px;
+    border: none;
+    font: inherit;
+    background-color: transparent;
+    text-transform: uppercase;
+  }
+  [is=nano-button]:focus {
+    outline: none;
+    font-weight: bold;
+    letter-spacing: -0.01em;
+    text-decoration: underline;
+  }
+</style>
+
+<script>
+  'use strict';
+  class NanoButton extends HTMLButtonElement {
+    createdCallback() {
+      this.addEventListener('mousedown', this.down.bind(this));
+      this.addEventListener('mouseup', this.up.bind(this));
+      this.addEventListener('click', this.click.bind(this));
+    }
+    needRipple() {
+      if (!this.ripple) {
+        this.ripple = document.createElement('nano-ripple');
+        this.ripple.color = 'navy';
+      }
+      return this.ripple;
+    }
+    finishWave() {
+      if (this.wave) {
+        this.wave.finish();
+        this.wave = null;
+      }
+    }
+    down(e) {
+      this.wave = this.needRipple().mouseripple(e);
+      setTimeout(function() {
+        this.finishWave();
+      }.bind(this), 3000)
+    }
+    up(e) {
+      //this.finishWave();
+    }
+    click(e) {
+      if (this.wave) {
+        this.finishWave();
+      } else {
+        this.needRipple().mouseripple(e).finish();
+      }
+    }
+  };
+  NanoButton.extends = 'button';
+  document.registerElement('nano-button', NanoButton);   
+</script>
+
+<style>
+  [is=nano-anchor] {
+    padding: 12px 24px;
+    border: none;
+    font: inherit;
+    background-color: transparent;
+    Xtext-transform: uppercase;
+    text-decoration: none;
+    display: inline-block;
+    color: inherit;
+  }
+  [is=nano-anchor]:focus {
+    outline: none;
+    font-weight: bold;
+    Xletter-spacing: -0.001em;
+    text-decoration: none;
+    color: #008ae6;
+  }
+</style>
+
+<script>
+  'use strict';
+  class NanoAnchor extends HTMLAnchorElement {
+    createdCallback() {
+      this.href = 'javascript:void(0)';
+      this.addEventListener('mousedown', this.down.bind(this));
+      this.addEventListener('click', this.click.bind(this));
+    }
+    needRipple() {
+      if (!this.ripple) {
+        this.ripple = document.createElement('nano-ripple');
+        this.ripple.color = 'navy';
+      }
+      return this.ripple;
+    }
+    finishWave() {
+      if (this.wave) {
+        this.wave.finish();
+        this.wave = null;
+      }
+    }
+    down(e) {
+      if (!this.wave) {
+        this.wave = this.needRipple().mouseripple(e);
+        setTimeout(function() {
+          this.finishWave();
+        }.bind(this), 3000)
+      }
+    }
+    click(e) {
+      if (this.wave) {
+        this.finishWave();
+      } else {
+        this.needRipple().mouseripple(e).finish();
+      }
+    }
+  };
+  NanoAnchor.extends = 'a';
+  document.registerElement('nano-anchor', NanoAnchor);   
+</script>
