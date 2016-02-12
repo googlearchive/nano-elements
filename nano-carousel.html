@@ -3,9 +3,9 @@
 
   <template>
     <div id="prevBtn" class="arrow-button" on-click="prev"></div>
-    <div id="content" flex=""></div>
+    <div id="content" flex="" on-touchstart="touchstart" on-touchmove="touchmove"></div>
     <div id="nextBtn" class="arrow-button" on-click="next"></div>
   </template>
 
-  <script>"use strict";document.registerElement("nano-carousel",{prototype:{__proto__:HTMLElement.prototype,createdCallback:function(){this.x=0,this.dom=Nano.prepare("nano-carousel").stamp(this)},get content(){return this._content=this._content||this.dom.$("#content"),this._content},prev:function(){var t=this.content.children,e=t.length,n=this.x,i=(n-1+e)%e;t[n].style.animationName="slide-out-right",t[i].style.animationName="slide-in-left",this.x=i},next:function(){var t=this.content.children,e=t.length,n=this.x,i=(n+1+e)%e;t[n].style.animationName="slide-out-left",t[i].style.animationName="slide-in-right",this.x=i}}});</script>
+  <script>"use strict";document.registerElement("nano-carousel",{prototype:{__proto__:HTMLElement.prototype,createdCallback:function(){this.x=0,this.touchX=0,this.dom=Nano.prepare("nano-carousel").stamp(this)},get content(){return this._content=this._content||this.dom.$("#content"),this._content},prev:function(){var t=this.content.children,e=t.length,n=this.x,i=(n-1+e)%e;t[n].style.animationName="slide-out-right",t[i].style.animationName="slide-in-left",this.x=i},next:function(){var t=this.content.children,e=t.length,n=this.x,i=(n+1+e)%e;t[n].style.animationName="slide-out-left",t[i].style.animationName="slide-in-right",this.x=i},touchstart:function(t){this.touchX=t.changedTouches[0].clientX},touchmove:function(t){if(this.touchX){var e=t.changedTouches[0].clientX-this.touchX;Math.abs(e)<60||(0>e?this.next():this.prev(),this.touchX=0)}}}});</script>
 </dom-module>
