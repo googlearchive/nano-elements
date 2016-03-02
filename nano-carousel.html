@@ -1,11 +1,120 @@
 <dom-module id="nano-carousel">
-  <style>nano-carousel>.arrow-button{margin:auto;padding:9px;font-size:36px;color:#999;cursor:pointer;border:1px solid #e5e5e5}nano-carousel>#prevBtn{width:18px;height:40px;border-left:none;border-radius:0 3px 3px 0}nano-carousel>#nextBtn{border-right:none;border-radius:3px 0 0 3px;width:18px;height:40px}#prevBtn::after,nano-carousel>#nextBtn::after{content:'';display:block;width:20px;height:20px;margin:10px 0 0 4px;box-sizing:border-box;border:1px solid #007dc6;-webkit-transform:rotate(45deg);transform:rotate(45deg)}nano-carousel>#prevBtn::after{border-top:none;border-right:none}nano-carousel>#nextBtn::after{margin-left:-4px;border-bottom:none;border-left:none}nano-carousel>#content{position:relative;overflow:hidden}nano-carousel>#content>*{display:block;position:absolute;top:0;right:0;bottom:0;left:0;animation:.3s ease-in-out both;will-change:transform}nano-carousel>#content>:not(:first-child){transform:translateX(100%)}@keyframes slide-in-left{from{transform:translateX(-100%)}to{transform:translateX(0)}}@keyframes slide-in-right{from{transform:translateX(100%)}to{transform:translateX(0)}}@keyframes slide-out-left{from{transform:translateX(0)}to{transform:translateX(-100%)}}@keyframes slide-out-right{from{transform:translateX(0)}to{transform:translateX(100%)}}</style>
+  <style>
+    nano-carousel > .arrow-button {
+      margin: auto;
+      padding: 9px;
+      font-size: 36px;
+      color: #999;
+      cursor: pointer;
+      border: 1px solid #e5e5e5;
+    }
+    nano-carousel > #prevBtn {
+      width: 18px;
+      height: 40px;
+      border-left: none;
+      border-radius: 0 3px 3px 0;
+    }
+    nano-carousel > #nextBtn {
+      border-right: none;
+      border-radius: 3px 0 0 3px;
+      width: 18px;
+      height: 40px;
+    }
+    nano-carousel > #nextBtn::after, #prevBtn::after {
+      content: '';
+      display: block;
+      width: 20px;
+      height: 20px;
+      margin: 10px 0px 0 4px;
+      box-sizing: border-box;
+      border: 1px solid #007dc6;
+      -webkit-transform: rotate(45deg);
+      transform: rotate(45deg);
+    }
+    nano-carousel > #prevBtn::after {
+      border-top: none;
+      border-right: none;
+    }
+    nano-carousel > #nextBtn::after {
+      margin-left: -4px;
+      border-bottom: none;
+      border-left: none;
+    }
+    nano-carousel > #content {
+      position: relative;
+      overflow: hidden;
+    }
+    nano-carousel > #content > * {
+      display: block;
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      animation: 300ms ease-in-out both;
+      will-change: transform;
+    }
+    nano-carousel > #content > *:not(:first-child) {
+      transform: translateX(100%);
+    }
+    @keyframes slide-in-left {
+      from { transform: translateX(-100%) }
+      to { transform: translateX(0) }
+    }
+    @keyframes slide-in-right {
+      from { transform: translateX(100%) }
+      to { transform: translateX(0) }
+    }
+    @keyframes slide-out-left {
+      from { transform: translateX(0) }
+      to { transform: translateX(-100%) }
+    }
+    @keyframes slide-out-right {
+      from { transform: translateX(0) }
+      to { transform: translateX(100%) }
+    }
+  </style>
 
   <template>
     <div id="prevBtn" class="arrow-button" on-click="prev"></div>
-    <div id="content" flex=""></div>
+    <div id="content" flex></div>
     <div id="nextBtn" class="arrow-button" on-click="next"></div>
   </template>
 
-  <script>"use strict";document.registerElement("nano-carousel",{prototype:{__proto__:HTMLElement.prototype,createdCallback:function(){this.x=0,this.dom=Nano.prepare("nano-carousel").stamp(this)},get content(){return this._content=this._content||this.dom.$("#content"),this._content},prev:function(){var t=this.content.children,e=t.length,n=this.x,i=(n-1+e)%e;t[n].style.animationName="slide-out-right",t[i].style.animationName="slide-in-left",this.x=i},next:function(){var t=this.content.children,e=t.length,n=this.x,i=(n+1+e)%e;t[n].style.animationName="slide-out-left",t[i].style.animationName="slide-in-right",this.x=i}}});</script>
+  <script>
+    'use strict';
+    document.registerElement('nano-carousel', {
+      prototype: {
+        __proto__: HTMLElement.prototype,
+        createdCallback: function() {
+          this.x = 0;
+          this.dom = Nano.prepare('nano-carousel').stamp(this);
+        },
+        get content() {
+          this._content = this._content || this.dom.$('#content');
+          return this._content;
+        },
+        prev: function() {
+          var c$ = this.content.children;
+          var n = c$.length;
+          var x = this.x;
+          var y = (x-1+n)%n;
+          
+          c$[x].style.animationName = 'slide-out-right';
+          c$[y].style.animationName = 'slide-in-left';
+          this.x = y;
+        },
+        next: function() {
+          var c$ = this.content.children;
+          var n = c$.length;
+          var x = this.x;
+          var y = (x+1+n)%n;
+          
+          c$[x].style.animationName = 'slide-out-left';
+          c$[y].style.animationName = 'slide-in-right';
+          this.x = y;
+        }
+      }
+    });   
+  </script>
 </dom-module>

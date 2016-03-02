@@ -1,3 +1,103 @@
-<style>nano-layer,nano-scrim{position:fixed;top:0;right:0;bottom:0;left:0;background-color:transparent;transition:opacity .1s}nano-scrim{Xpointer-events:none;background-color:#000}nano-box{position:absolute;opacity:1;pointer-events:none;background-color:#fff;transition:transform .2s ease-in-out;transform-origin:0 0;width:200px;height:200px}</style>
+<style>
+  nano-layer, nano-scrim {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: transparent;
+    transition: opacity 100ms;
+  }
+  nano-scrim {
+    Xpointer-events: none;
+    background-color: black;
+  }
+  nano-box {
+    position: absolute;
+    opacity: 1.0;
+    pointer-events: none;
+    background-color: white;
+    transition: transform 200ms ease-in-out;
+    transform-origin: 0 0;
+    width: 200px;
+    height: 200px;
+  }
+</style>
 
-<script>!function(){"use strict";var t=[],e=function(t,e){t.style.webkitTransform=t.style.transform=e},n=function(t,e,n,o){return"translate3d("+t+","+e+","+n+") "},o=function(t,e,n){return"scale("+t+","+e+") "},r=function(t,e,n){setTimeout(e.bind(n),void 0!==t?t:1)};document.registerElement("nano-layers",{prototype:{__proto__:HTMLElement.prototype,open:function(e){var n=document.createElement("nano-layer");n.addEventListener("touchmove",function(t){t.preventDefault()}),n.addEventListener("wheel",function(t){t.preventDefault()}),e&&(n.style.backgroundColor=e),n.style.opacity=0,r(1,function(){n.style.opacity=1}),this.appendChild(n);var o={layer:n};return t.push(o),o},close:function(e){var n=t.pop();n&&(n.layer.style.opacity=0,r(Math.max(300,e||0),function(){n.layer.remove()}))}}}),document.registerElement("nano-animated-box",{prototype:{__proto__:HTMLElement.prototype,createdCallback:function(){},animate:function(t,a,i){var l=this.box=document.createElement("nano-box");return l.style.width=a.width+"px",l.style.height=a.height+"px",e(l,n(a.left+"px",a.top+"px",0,l)+o(1,1)),t.layer.appendChild(l),r(1,function(){var t=i.width/(a.width||1),r=i.height/(a.height||1);e(l,n(i.left+"px",i.top+"px",0,l)+o(t,r))}),l}}})}();</script>
+<script>
+(function() {
+  'use strict';
+  
+  var stack = [];
+  
+  var transform = function(node, transform) {
+    node.style.webkitTransform = node.style.transform = transform;
+  };
+  var translate3d = function(x, y, z, node) {
+    return 'translate3d(' + x + ',' + y + ',' + z + ') ';
+  };
+  var scale = function(sx, sy, node) {
+    return 'scale(' + sx + ',' + sy + ') ';
+  };
+  var wait = function(delay, fn, context) {
+    setTimeout(fn.bind(context), delay !== undefined ? delay : 1);
+  };
+
+  document.registerElement('nano-layers', {
+    prototype: {
+      __proto__: HTMLElement.prototype,
+      open: function(scrimBg) {
+        var layer = document.createElement('nano-layer');
+        layer.addEventListener('touchmove', function(e) {
+          e.preventDefault();
+        });
+        layer.addEventListener('wheel', function(e) {
+          e.preventDefault();
+        });
+        if (scrimBg) {
+          layer.style.backgroundColor = scrimBg;
+        }
+        layer.style.opacity = 0;
+        wait(1, function() {
+          layer.style.opacity = 1;
+        });
+        this.appendChild(layer);
+        var info = {layer: layer}; //, scrim: scrim};
+        stack.push(info);
+        return info;
+      },
+      close: function(delay) {
+        var info = stack.pop();
+        if (info) {
+          info.layer.style.opacity = 0;
+          wait(Math.max(300, delay || 0), function() {
+            info.layer.remove();
+          });
+        }
+      }
+    }
+  });
+  
+  document.registerElement('nano-animated-box', {
+    prototype: {
+      __proto__: HTMLElement.prototype,
+      createdCallback: function() {
+      },
+      animate: function(layer, startRect, endRect) {
+        var box = this.box = document.createElement('nano-box');
+        box.style.width = startRect.width + 'px';
+        box.style.height = startRect.height + 'px';
+        transform(box, translate3d(startRect.left + 'px', startRect.top + 'px', 0, box) + scale(1, 1));
+        layer.layer.appendChild(box);
+        wait(1, function() {
+          var sx = endRect.width / (startRect.width || 1);
+          var sy = endRect.height / (startRect.height || 1);
+          transform(box, translate3d(endRect.left + 'px', endRect.top + 'px', 0, box) + scale(sx, sy));
+        });
+        return box;
+      }
+    }
+  });
+  
+})();
+</script>
